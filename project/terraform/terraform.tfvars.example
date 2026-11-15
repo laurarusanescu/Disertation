@@ -1,0 +1,13 @@
+aws_region     = "eu-central-1"
+cluster_name   = "eks-cost-poc"
+run_id         = "run-001"
+project_name   = "eks-poc"
+workload_level = "light"
+
+node_instance_type = "t3.medium"
+min_node_count     = 1
+max_node_count     = 3
+node_capacity_type = "ON_DEMAND"
+
+# Restrict this before applying, for example: ["203.0.113.10/32"]
+cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
