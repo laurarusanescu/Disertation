@@ -59,10 +59,29 @@ project_name   = "eks-poc"
 workload_level = "light"
 
 node_instance_type = "t3.medium"
-min_node_count     = 1
-max_node_count     = 3
+cluster_size       = "small"
 node_capacity_type = "ON_DEMAND"
 ```
+
+Cluster size presets:
+
+| Size | Min nodes | Desired nodes | Max nodes |
+| --- | ---: | ---: | ---: |
+| `small` | 1 | 1 | 2 |
+| `medium` | 2 | 2 | 3 |
+| `large` | 2 | 3 | 4 |
+
+Use `small` for the first run. Use `medium` or `large` only when you are ready to pay for more worker nodes.
+
+You can override the preset by setting `min_node_count` and `max_node_count` in `terraform.tfvars`:
+
+```hcl
+cluster_size    = "medium"
+min_node_count  = 1
+max_node_count  = 3
+```
+
+If overrides are set, `max_node_count` must be greater than or equal to `min_node_count`, and `max_node_count` cannot be larger than `10`.
 
 Optional but recommended: restrict the Kubernetes API endpoint CIDR:
 

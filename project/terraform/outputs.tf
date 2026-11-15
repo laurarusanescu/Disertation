@@ -18,14 +18,24 @@ output "node_instance_type" {
   value       = var.node_instance_type
 }
 
+output "cluster_size" {
+  description = "Selected cluster size preset."
+  value       = var.cluster_size
+}
+
 output "min_node_count" {
   description = "Managed node group minimum size."
-  value       = var.min_node_count
+  value       = local.effective_min_node
 }
 
 output "max_node_count" {
   description = "Managed node group maximum size."
-  value       = var.max_node_count
+  value       = local.effective_max_node
+}
+
+output "desired_node_count" {
+  description = "Managed node group desired size."
+  value       = min(local.desired_node_count, local.effective_max_node)
 }
 
 output "kubernetes_version" {

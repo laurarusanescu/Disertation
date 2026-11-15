@@ -7,6 +7,29 @@ locals {
   vpc_cidr    = "10.42.0.0/16"
   name_prefix = var.cluster_name
 
+  cluster_size_presets = {
+    small = {
+      min     = 1
+      desired = 1
+      max     = 2
+    }
+    medium = {
+      min     = 2
+      desired = 2
+      max     = 3
+    }
+    large = {
+      min     = 2
+      desired = 3
+      max     = 4
+    }
+  }
+
+  selected_size      = local.cluster_size_presets[var.cluster_size]
+  effective_min_node = coalesce(var.min_node_count, local.selected_size.min)
+  effective_max_node = coalesce(var.max_node_count, local.selected_size.max)
+  desired_node_count = max(local.selected_size.desired, local.effective_min_node)
+
   common_tags = {
     Project     = var.project_name
     RunId       = var.run_id
@@ -166,9 +189,9 @@ resource "aws_eks_node_group" "baseline" {
   instance_types = [var.node_instance_type]
 
   scaling_config {
-    desired_size = var.min_node_count
-    min_size     = var.min_node_count
-    max_size     = var.max_node_count
+    desired_size = min(local.desired_node_count, local.effective_max_node)
+    min_size     = local.effective_min_node
+    max_size     = local.effective_max_node
   }
 
   update_config {
@@ -180,8 +203,16 @@ resource "aws_eks_node_group" "baseline" {
   }
 
   tags = merge(local.common_tags, {
-    Name = "${local.name_prefix}-baseline"
+    Name        = "${local.name_prefix}-baseline"
+    ClusterSize = var.cluster_size
   })
+
+  lifecycle {
+    precondition {
+      condition     = local.effective_max_node >= local.effective_min_node
+      error_message = "max_node_count must be greater than or equal to min_node_count."
+    }
+  }
 
   depends_on = [
     aws_iam_role_policy_attachment.node_worker,

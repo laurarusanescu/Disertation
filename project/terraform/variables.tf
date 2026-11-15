@@ -34,25 +34,36 @@ variable "node_instance_type" {
   default     = "t3.medium"
 }
 
-variable "min_node_count" {
-  description = "Minimum node count for the managed node group."
-  type        = number
-  default     = 1
+variable "cluster_size" {
+  description = "Node count preset for the POC cluster. Use small, medium, or large."
+  type        = string
+  default     = "small"
 
   validation {
-    condition     = var.min_node_count >= 1
-    error_message = "min_node_count must be at least 1 for this POC."
+    condition     = contains(["small", "medium", "large"], var.cluster_size)
+    error_message = "cluster_size must be one of: small, medium, large."
+  }
+}
+
+variable "min_node_count" {
+  description = "Optional minimum node count override. Leave null to use cluster_size."
+  type        = number
+  default     = null
+
+  validation {
+    condition     = var.min_node_count == null || var.min_node_count >= 1
+    error_message = "min_node_count must be null or at least 1."
   }
 }
 
 variable "max_node_count" {
-  description = "Maximum node count for the managed node group."
+  description = "Optional maximum node count override. Leave null to use cluster_size."
   type        = number
-  default     = 3
+  default     = null
 
   validation {
-    condition     = var.max_node_count >= var.min_node_count && var.max_node_count <= 10
-    error_message = "max_node_count must be greater than or equal to min_node_count and no larger than 10."
+    condition     = var.max_node_count == null || var.max_node_count <= 10
+    error_message = "max_node_count must be null or no larger than 10."
   }
 }
 
